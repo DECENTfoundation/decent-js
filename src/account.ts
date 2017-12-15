@@ -3,6 +3,7 @@ import { ChainApi, ChainMethods } from './api/chain';
 import {CryptoUtils} from './crypt';
 import {Memo, OperationName, Transaction, TransferOperation} from './transaction';
 import {KeyPrivate, Utils} from './utils';
+import {formatToDctPrice, formatToReadiblePrice} from './helpers';
 
 export interface TransactionRaw {
     id: string;
@@ -39,7 +40,7 @@ export class Asset {
 
     public static createAsset(amount: number, assetId: string): Asset {
         return {
-            amount: Math.floor(amount * ChainApi.DCTPower),
+            amount: formatToDctPrice(amount),
             asset_id: assetId
         };
     }
@@ -93,8 +94,8 @@ export class TransactionRecord {
         this.fromAccountId = transaction.m_from_account;
         this.toAccountId = transaction.m_to_account;
         this.operationType = transaction.m_operation_type;
-        this.transactionAmount = transaction.m_transaction_amount.amount / ChainApi.DCTPower;
-        this.transactionFee = transaction.m_transaction_fee.amount / ChainApi.DCTPower;
+        this.transactionAmount = formatToReadiblePrice(transaction.m_transaction_amount.amount);
+        this.transactionFee = formatToReadiblePrice(transaction.m_transaction_fee.amount);
         this.description = transaction.m_str_description;
         this.timestamp = transaction.m_timestamp;
         this.memo = new TransactionMemo(transaction);
@@ -389,7 +390,7 @@ export class AccountApi {
             ]);
             this._dbApi.execute(dbOperation)
                 .then(res => {
-                    resolve(res[0].amount / ChainApi.DCTPower);
+                    resolve(formatToReadiblePrice(res[0].amount));
                 })
                 .catch(err => {
                     reject(this.handleError(AccountError.database_operation_failed, err));

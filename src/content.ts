@@ -9,6 +9,7 @@ import {
 } from './transaction';
 import { Asset } from './account';
 import {isUndefined} from 'util';
+import {formatToDctPrice, formatToReadiblePrice} from './helpers';
 
 const moment = require('moment');
 
@@ -167,6 +168,7 @@ export class ContentApi {
                 .then((content: any) => {
                     content.forEach((c: any) => {
                         c.synopsis = JSON.parse(c.synopsis);
+                        c.price.amount = formatToReadiblePrice(c.price.amount);
                     });
                     resolve(content);
                 })
@@ -195,6 +197,7 @@ export class ContentApi {
                     if (isUndefined(objectified.price['amount'])) {
                         objectified.price = objectified.price['map_price'][0][1];
                     }
+                    objectified.price.amount = formatToReadiblePrice(objectified.price.amount);
                     resolve(objectified as Content);
                 })
                 .catch(err => {
@@ -336,7 +339,7 @@ export class ContentApi {
                     {
                         region: 1,
                         price: {
-                            amount: content.price,
+                            amount: formatToDctPrice(content.price),
                             asset_id: ChainApi.asset_id
                         }
                     }
@@ -346,7 +349,7 @@ export class ContentApi {
                 key_parts: content.keyParts,
                 expiration: content.date.toString(),
                 publishing_fee: {
-                    amount: this.calculateFee(content),
+                    amount: formatToDctPrice(this.calculateFee(content)),
                     asset_id: ChainApi.asset_id
                 },
                 synopsis: JSON.stringify(content.synopsis)
@@ -442,6 +445,7 @@ export class ContentApi {
             this._dbApi
                 .execute(dbOperation)
                 .then(result => {
+                    result.forEach(s => s.price = formatToReadiblePrice(s.price));
                     resolve(result as Seeder[]);
                 })
                 .catch(err => {
@@ -490,6 +494,7 @@ export class ContentApi {
                                     if (bought.URI === content.URI) {
                                         bought.synopsis = JSON.parse(bought.synopsis);
                                         content.buy_id = bought.id;
+                                        content.price.amount = formatToReadiblePrice(content.price.amount);
                                         result.push(content as Content);
                                     }
                                 });
