@@ -1,12 +1,16 @@
-import {setLibRef} from './helpers';
-import {ContentApi} from './content';
-import {ChainApi} from './api/chain';
-import {DatabaseApi} from './api/database';
-import {AccountApi} from './account';
+import { setLibRef } from './helpers';
+import { ContentApi } from './content';
+import { ChainApi } from './api/chain';
+import { DatabaseApi } from './api/database';
+import { AccountApi } from './account';
+import { HistoryApi } from './api/history';
+import { ApiConnector } from './api/apiConnector';
+import {ExplorerModule} from './explorer';
 
-let decentjslib: any = null;
-let _content: ContentApi = null;
-let _account: AccountApi = null;
+let _decentjslib: any;
+let _content: ContentApi;
+let _account: AccountApi;
+let _explorer: ExplorerModule;
 
 export class DecentError {
     static app_not_initialized = 'app_not_initialized';
@@ -19,15 +23,19 @@ export interface DecentConfig {
 }
 
 export function initialize(config: DecentConfig, decentjs_lib: any): void {
-    decentjslib = decentjs_lib;
-    setLibRef(decentjslib);
-    ChainApi.setupChain(config.chain_id, decentjslib.ChainConfig);
-    const database = DatabaseApi.create(config, decentjslib.Apis);
-    const apiConnectionPromise = database.initApi();
+    _decentjslib = decentjs_lib;
+    setLibRef(_decentjslib);
+    ChainApi.setupChain(config.chain_id, _decentjslib.ChainConfig);
 
-    const chain = new ChainApi(apiConnectionPromise, decentjslib.ChainStore);
+    const connector = new ApiConnector(config.decent_network_wspaths, _decentjslib.Apis);
+
+    const database = new DatabaseApi(_decentjslib.Apis, connector);
+    const historyApi = new HistoryApi(_decentjslib.Apis, connector);
+
+    const chain = new ChainApi(connector, _decentjslib.ChainStore);
     _content = new ContentApi(database, chain);
-    _account = new AccountApi(database, chain);
+    _account = new AccountApi(database, chain, historyApi);
+    _explorer = new ExplorerModule(database);
 }
 
 export function content(): ContentApi {
@@ -36,4 +44,8 @@ export function content(): ContentApi {
 
 export function account(): AccountApi {
     return _account;
+}
+
+export function explorer(): ExplorerModule {
+    return _explorer;
 }
