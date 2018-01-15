@@ -1,15 +1,4 @@
 "use strict";
-
-const chainId = '17401602b201b3c45a3ad98afc6fb458f91f519bd30d1058adf6f2bed66376bc';
-const decentNetworkAddresses = ['wss://stage.decentgo.com:8090'];
-
-const decentjs_lib = window['decentjs-lib'];
-
-decent.initialize({
-    chain_id: chainId,
-    decent_network_wspaths: decentNetworkAddresses
-}, decentjs_lib);
-
 const el = id => document.getElementById(id);
 
 const contentList = el('contentList');
@@ -49,7 +38,7 @@ function showDetail(itemId) {
     contentDetail.innerHTML += '<p>Description: ' + item.synopsis.description + '</p>';
     contentDetail.innerHTML += '<h4>Price: ' + item.price.amount + '</h4>';
     contentDetail.innerHTML += '<h4>Expiration: ' + item.expiration + '</h4>';
-    contentDetail.innerHTML += JSON.stringify(item);
+    contentDetail.innerHTML += JSON.stringify(item, null, 2);
 }
 
 //# sourceMappingURL=searchContent.js.map
