@@ -7,7 +7,6 @@ import { HistoryApi } from './api/history';
 import { ApiConnector } from './api/apiConnector';
 import {ExplorerModule} from './explorer';
 
-let _decentjslib: any;
 let _content: ContentApi;
 let _account: AccountApi;
 let _explorer: ExplorerModule;
@@ -18,8 +17,8 @@ export class DecentError {
 }
 
 export interface DecentConfig {
-    decent_network_wspaths: string[]
-    chain_id: string
+    dcoreNetworkWSPaths: string[]
+    chainId: string
 }
 
 /**
@@ -27,20 +26,20 @@ export interface DecentConfig {
  *
  * @export
  * @param {DecentConfig} config                                 Configuration of decent network yout about to connect to
- * @param {*} decentjs_lib                                      Reference to low level decentjs-lib library
- * @param {(string) => void} [connectionStatusCallback=null]    Status callback to handle connection. Available states are 'open', 'closed'
+ * @param {*} dcore                                             Reference to low level decentjs-lib library
+ * @param {(string) => void} [connectionStatusCallback=null]    Status callback to handle connection. Available states are
+ *                                                              defined in ConnectionState enum
  */
-export function initialize(config: DecentConfig, decentjs_lib: any, connectionStatusCallback: (string) => void = null): void {
-    _decentjslib = decentjs_lib;
-    setLibRef(_decentjslib);
-    ChainApi.setupChain(config.chain_id, _decentjslib.ChainConfig);
+export function initialize(config: DecentConfig, dcore: any, connectionStatusCallback: (string) => void = null): void {
+    setLibRef(dcore);
+    ChainApi.setupChain(config.chainId, dcore.ChainConfig);
 
-    const connector = new ApiConnector(config.decent_network_wspaths, _decentjslib.Apis, connectionStatusCallback);
+    const connector = new ApiConnector(config.dcoreNetworkWSPaths, dcore.Apis, connectionStatusCallback);
 
-    const database = new DatabaseApi(_decentjslib.Apis, connector);
-    const historyApi = new HistoryApi(_decentjslib.Apis, connector);
+    const database = new DatabaseApi(dcore.Apis, connector);
+    const historyApi = new HistoryApi(dcore.Apis, connector);
 
-    const chain = new ChainApi(connector, _decentjslib.ChainStore);
+    const chain = new ChainApi(connector, dcore.ChainStore);
     _content = new ContentApi(database, chain);
     _account = new AccountApi(database, chain, historyApi);
     _explorer = new ExplorerModule(database);
