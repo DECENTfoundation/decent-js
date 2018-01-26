@@ -1,3 +1,7 @@
+This repository is obsolete, use https://github.com/DECENTfoundation/dcorejs
+
+----
+
 # Quick look into DECENT
 
 ## The new way of publishing
